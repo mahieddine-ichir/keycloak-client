@@ -94,9 +94,9 @@ public class Application {
         try {
 
             String uri = UriComponentsBuilder.fromHttpUrl(tokenUrl)
-                    .path("realms")
-                    .path(realm)
-                    .path("protocol/openid-connect/auth")
+                    .path("/realms")
+                    .path("/"+realm)
+                    .path("/protocol/openid-connect/auth")
                     .queryParam("response_type", "code")
                     .queryParam("client_id", realm)
                     .toUriString();
