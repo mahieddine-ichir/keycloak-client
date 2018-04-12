@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import sun.misc.BASE64Encoder;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -115,7 +116,7 @@ public class Application {
             String tokenPayload = body.get("access_token").split("\\.")[1];
 
             // decode
-            Map<String, String> payload = new ObjectMapper().readValue(tokenPayload, Map.class);
+            Map<String, String> payload = new ObjectMapper().readValue(Base64.getDecoder().decode(tokenPayload.getBytes()), Map.class);
             //body.putAll(payload);
 
             return payload;
