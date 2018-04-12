@@ -112,7 +112,7 @@ public class Application {
             System.out.println("> on auth_code "+responseEntity.getBody());
 
             Map<String, String> body = responseEntity.getBody();
-            String tokenPayload = body.get("access_token").split(".")[1];
+            String tokenPayload = body.get("access_token").split("\\.")[1];
 
             // decode
             Map<String, String> payload = new ObjectMapper().readValue(tokenPayload, Map.class);
