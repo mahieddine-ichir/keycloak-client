@@ -58,6 +58,11 @@ public class Application {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/")
+    public String index() {
+        return "<body><a href=\"https://public.michir.aws.maileva.net:8443/auth/realms/demo/protocol/openid-connect/auth?response_type=code&client_id=demo\">Login page</body>";
+    }
+
     /**
      * ON http://localhost:8180/auth/realms/demo/protocol/openid-connect/auth?response_type=code&client_id=demo.
      * @param request
