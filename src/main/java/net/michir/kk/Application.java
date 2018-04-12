@@ -1,5 +1,8 @@
 package net.michir.kk;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,6 +20,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Base64;
 import java.util.Collections;
@@ -106,13 +110,22 @@ public class Application {
             ResponseEntity<Map> responseEntity = restTemplate.postForEntity(uri, params, Map.class);
             //ResponseEntity<String> responseEntity = restTemplate.exchange(tokenUrl, HttpMethod.POST, new HttpEntity<>(httpHeaders), String.class, params);
             System.out.println("> on auth_code "+responseEntity.getBody());
-            return responseEntity.getBody();
 
+            Map<String, String> body = responseEntity.getBody();
+            String tokenPayload = body.get("access_token").split(".")[0];
+
+            // decode
+            Map<String, String> payload = new ObjectMapper().readValue(tokenPayload, Map.class);
+            //body.putAll(payload);
+
+            return payload;
 
         } catch (HttpStatusCodeException e) {
             System.out.println("CAUSE: "+e.getResponseBodyAsString());
             System.out.println("CODE: "+e.getStatusCode());
             return Collections.singletonMap("error", e.getResponseBodyAsString());
+        } catch (Exception e) {
+            return Collections.singletonMap("error", e.getMessage());
         }
     }
 }
