@@ -1,0 +1,3 @@
+#/bin/bash
+
+curl -vk -X POST https://public.michir.aws.maileva.net:8443/auth/realms/demo/protocol/openid-connect/token/introspect -d "token=$1&token_type_hint=access_token" -u 'demo:56189b8f-ea08-409a-ab1e-e79c95a80410'

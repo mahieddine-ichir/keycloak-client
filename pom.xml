@@ -23,16 +23,15 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-<!--
+        <!--
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-spring-boot-starter</artifactId>
         </dependency>
--->
+        -->
     </dependencies>
 
-
-    <!--
+<!--
         <dependencyManagement>
             <dependencies>
                 <dependency>
@@ -44,8 +43,7 @@
                 </dependency>
             </dependencies>
         </dependencyManagement>
-    -->
-
+-->
     <build>
         <plugins>
             <plugin>
