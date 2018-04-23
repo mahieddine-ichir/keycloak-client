@@ -98,7 +98,7 @@ public class Application {
             String tokenPayload = body.get("access_token").split("\\.")[1];
 
             Map<String, String> payload = new ObjectMapper().readValue(Base64.getDecoder().decode(tokenPayload.getBytes()), Map.class);
-            payload.put("token", tokenPayload);
+            payload.put("token", body.get("access_token"));
 
             return payload;
 
