@@ -65,7 +65,7 @@ public class Application {
                 .path("/"+realm)
                 .path("/protocol/openid-connect/auth")
                 .queryParam("reponse_type", "code")
-                .queryParam("code", clientId)
+                .queryParam("client_id", clientId)
                 .toUriString();
 
         return String.format("<body><a href='%s'>Login page</body>",
