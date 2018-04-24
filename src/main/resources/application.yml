@@ -1,5 +1,6 @@
 keycloak:
   realm: demo
+  clientId: demo
   auth-server-url: http://127.0.0.1:8180/auth/
   credentials:
     secret: 56189b8f-ea08-409a-ab1e-e79c95a80410

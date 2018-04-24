@@ -32,10 +32,13 @@ public class Application {
     RestTemplate restTemplate = new RestTemplate();
 
     @Value("${keycloak.auth-server-url}")
-    String tokenUrl; // = "http://localhost:8180/auth/realms/demo/protocol/openid-connect/token";
+    String keycloakServerUrl; // = "http://localhost:8180/auth/realms/demo/protocol/openid-connect/token";
 
     @Value("${keycloak.realm}")
     String realm;
+
+    @Value("${keycloak.clientId}")
+    String clientId;
 
     @Value("${keycloak.credentials.secret}")
     String secret;
@@ -53,12 +56,22 @@ public class Application {
         return ResponseEntity.ok().build();
     }
 
-    /*
+
     @GetMapping("/")
     public String index() {
-        return "<body><a href=\"https://public.michir.aws.maileva.net:8443/auth/realms/demo/protocol/openid-connect/auth?response_type=code&client_id=demo\">Login page</body>";
+
+        String loginUrl = UriComponentsBuilder.fromHttpUrl(keycloakServerUrl)
+                .path("/realms")
+                .path("/"+realm)
+                .path("/protocol/openid-connect/auth")
+                .queryParam("reponse_type", "code")
+                .queryParam("code", clientId)
+                .toUriString();
+
+        return String.format("<body><a href='%s'>Login page</body>",
+                loginUrl
+        );
     }
-    */
 
     /**
      * ON http://localhost:8180/auth/realms/demo/protocol/openid-connect/auth?response_type=code&client_id=demo.
@@ -72,7 +85,7 @@ public class Application {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.set("Authorization", "Basic "+ Base64.getEncoder().encodeToString((realm+":"+secret).getBytes()));
+        headers.set("Authorization", "Basic "+ Base64.getEncoder().encodeToString((clientId+":"+secret).getBytes()));
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
         map.add("code", code);
@@ -83,7 +96,7 @@ public class Application {
 
         try {
 
-            String uri = UriComponentsBuilder.fromHttpUrl(tokenUrl)
+            String uri = UriComponentsBuilder.fromHttpUrl(keycloakServerUrl)
                     .path("/realms")
                     .path("/"+realm)
                     .path("/protocol/openid-connect/token")
