@@ -183,14 +183,14 @@ public class Application {
         headers.set("Authorization", "Bearer "+ token);
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(null, headers);
 
-        String uri = UriComponentsBuilder.fromHttpUrl(keycloakServerUrl)
+        String url = UriComponentsBuilder.fromHttpUrl(keycloakServerUrl)
                 .path("/realms")
                 .path("/"+realm)
                 .path("/protocol/openid-connect/userinfo")
                 .toUriString();
 
-        String url = "https://api.dcos.aws.maileva.net/sendings-api/v1/mail/sendings";
         ResponseEntity<Map> exchange = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
+        System.out.println(exchange);
 
         Map context = (Map) exchange.getBody().get("context");
         Map user = (Map) context.get("user");
