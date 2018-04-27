@@ -107,16 +107,17 @@ public class Application {
             System.out.println("> on auth_code "+responseEntity.getBody());
 
             Map<String, String> body = responseEntity.getBody();
-            String tokenPayload = body.get("access_token").split("\\.")[1];
+            String access_token = body.get("access_token");
+            String tokenPayload = access_token.split("\\.")[1];
 
             Map<String, String> payload = new ObjectMapper().readValue(Base64.getDecoder().decode(tokenPayload.getBytes()), Map.class);
-            payload.put("token", body.get("access_token"));
+            payload.put("token", access_token);
 
             // get sendings
             {
 
                 HttpHeaders sendingsHeader = new HttpHeaders();
-                sendingsHeader.set("Authorization", "Bearer "+ body.get("access_token"));
+                sendingsHeader.set("Authorization", "Bearer "+ access_token);
 
                 HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(null, sendingsHeader);
 
@@ -131,7 +132,7 @@ public class Application {
                 this.sendingsHtml += "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css\" integrity=\"sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4\" crossorigin=\"anonymous\">\n" +
                         "</head>";
 
-                sendingsHtml += String.format("<h1>Mes envois (%s)</h1>", request.getUserPrincipal().getName());
+                sendingsHtml += String.format("<h1>Mes envois (%s)</h1>", username(access_token));
                 sendingsHtml += "<body><table class=\"table\">";
                 sendingsHtml += "<tr>";
                 sendingsHtml += "<th>ID</th>";
@@ -171,5 +172,28 @@ public class Application {
             e.printStackTrace();
             return String.format("<body><h3>ERROR<h3>message: %s</body>", e.getMessage());
         }
+    }
+
+    /**
+     * curl -vX GET http://keycloak.dcos.aws.maileva.net/auth/realms/demo/protocol/openid-connect/userinfo -H "Authorization: Bearer
+     */
+    private String username(String token) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer "+ token);
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(null, headers);
+
+        String uri = UriComponentsBuilder.fromHttpUrl(keycloakServerUrl)
+                .path("/realms")
+                .path("/"+realm)
+                .path("/protocol/openid-connect/userinfo")
+                .toUriString();
+
+        String url = "https://api.dcos.aws.maileva.net/sendings-api/v1/mail/sendings";
+        ResponseEntity<Map> exchange = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
+
+        Map context = (Map) exchange.getBody().get("context");
+        Map user = (Map) context.get("user");
+        return (String) user.get("login");
     }
 }
