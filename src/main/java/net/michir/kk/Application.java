@@ -131,7 +131,7 @@ public class Application {
                 this.sendingsHtml += "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css\" integrity=\"sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4\" crossorigin=\"anonymous\">\n" +
                         "</head>";
 
-                sendingsHtml += "<h1>Mes envois</h1>";
+                sendingsHtml += String.format("<h1>Mes envois (%s)</h1>", request.getUserPrincipal().getName());
                 sendingsHtml += "<body><table class=\"table\">";
                 sendingsHtml += "<tr>";
                 sendingsHtml += "<th>ID</th>";
