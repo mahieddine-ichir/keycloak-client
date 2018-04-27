@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.servlet.http.HttpServletRequest;
 import java.net.MalformedURLException;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +44,8 @@ public class Application {
     @Value("${redirect_uri}")
     String redirectUri;
 
+    private String sendingsHtml;
+
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
@@ -55,7 +55,6 @@ public class Application {
         System.out.println("... calling secured!");
         return ResponseEntity.ok().build();
     }
-
 
     @GetMapping("/")
     public String index() {
@@ -79,7 +78,7 @@ public class Application {
      * @return
      */
     @GetMapping("/onlogin")
-    public Map onLogin(HttpServletRequest request) throws MalformedURLException {
+    public String onLogin(HttpServletRequest request) throws MalformedURLException {
         String code = request.getParameter("code");
         System.out.println("code="+ code);
 
@@ -113,26 +112,52 @@ public class Application {
             Map<String, String> payload = new ObjectMapper().readValue(Base64.getDecoder().decode(tokenPayload.getBytes()), Map.class);
             payload.put("token", body.get("access_token"));
 
-            return payload;
+            // get sendings
+            {
+
+                HttpHeaders sendingsHeader = new HttpHeaders();
+                sendingsHeader.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                sendingsHeader.set("Authorization", "Bearer "+ body.get("access_token"));
+
+                HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(null, sendingsHeader);
+
+                String sendingsUrl = "https://api.dcos.aws.maileva.net/sendings-api/v1/mail/sendings";
+                ResponseEntity<Map> exchange = restTemplate.exchange(sendingsUrl, HttpMethod.GET, entity, Map.class);
+
+                Collection sendings = (Collection) exchange.getBody().get("sendings");
+
+                this.sendingsHtml = "";
+                sendingsHtml += "<body><table style=\"width:100%\">";
+                sendingsHtml += "<tr>";
+                sendingsHtml += "<th>ID</th>";
+                sendingsHtml += "<th>Nom</th>";
+                sendingsHtml += "<th>Statut</th>";
+                sendingsHtml += "</tr>";
+                sendings.forEach(sending -> {
+
+                    Map sendingMap = (Map) sending;
+
+                    sendingsHtml += "<tr>";
+
+                    sendingsHtml += "<td>"+sendingMap.get("id")+"</td>";
+                    sendingsHtml += "<td>"+sendingMap.get("status")+"</td>";
+                    sendingsHtml += "<td>"+sendingMap.get("name")+"</td>";
+
+                    sendingsHtml += "</tr>";
+
+                });
+                sendingsHtml += "</table></body>";
+                return sendingsHtml;
+            }
 
         } catch (HttpStatusCodeException e) {
             System.out.println("CAUSE: "+e.getResponseBodyAsString());
             System.out.println("CODE: "+e.getStatusCode());
 
-            return new HashMap() {
-                {
-                    put("error", e.getResponseBodyAsByteArray());
-                    put("errorCode", e.getStatusCode());
-                }
-            };
+            return String.format("<body><h3>ERROR<h3>code: %s<br/>message: %s</body>", e.getStatusCode().name(), e.getResponseBodyAsString());
 
         } catch (Exception e) {
-            return new HashMap() {
-                {
-                    put("error", e.getMessage());
-                }
-            };
-
+            return String.format("<body><h3>ERROR<h3>message: %s</body>", e.getMessage());
         }
     }
 }
