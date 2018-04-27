@@ -116,7 +116,6 @@ public class Application {
             {
 
                 HttpHeaders sendingsHeader = new HttpHeaders();
-                sendingsHeader.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
                 sendingsHeader.set("Authorization", "Bearer "+ body.get("access_token"));
 
                 HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(null, sendingsHeader);
