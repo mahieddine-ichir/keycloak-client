@@ -161,12 +161,14 @@ public class Application {
             }
 
         } catch (HttpStatusCodeException e) {
+            e.printStackTrace();
             System.out.println("CAUSE: "+e.getResponseBodyAsString());
             System.out.println("CODE: "+e.getStatusCode());
 
             return String.format("<body><h3>ERROR<h3>code: %s<br/>message: %s</body>", e.getStatusCode().name(), e.getResponseBodyAsString());
 
         } catch (Exception e) {
+            e.printStackTrace();
             return String.format("<body><h3>ERROR<h3>message: %s</body>", e.getMessage());
         }
     }
